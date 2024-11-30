@@ -1,8 +1,8 @@
 <?php
 
-use Core\Route;
-use Core\DataHandling;
-use Core\ErrorHandling;
+use Kaviru\MuseCore\Route;
+use Kaviru\MuseCore\DataHandling;
+use Kaviru\MuseCore\ErrorHandling;
 
 function view(string $location, array $variables = null, array $error = null)
 {

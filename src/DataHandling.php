@@ -1,6 +1,6 @@
 <?php
 
-namespace Core;
+namespace Kaviru\MuseCore;
 
 /**
  * Manage Get, Post, Cookies, Files, Server Data, Session Data and Env data.  

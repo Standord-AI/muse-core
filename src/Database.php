@@ -1,11 +1,11 @@
 <?php
 
-namespace Core;
+namespace Kaviru\MuseCore;
 
 use PDO;
 use PDOException;
-use Core\DataHandling;
-use Core\ErrorHandling;
+use Kaviru\MuseCore\DataHandling;
+use Kaviru\MuseCore\ErrorHandling;
 
 /**
  * Manage any database system using this ORM. Made using the php PDO and classes.
