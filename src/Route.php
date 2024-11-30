@@ -24,31 +24,42 @@ class Route
             $uri = '/' . $uri;
         }
 
-        $URLs[$uri] = $callback;
+        $URLs[$uri] = ['callback' => $callback, 'classMethod' => $classMethod, 'methodAllowed' => $methodAllowed];
+    }
 
-        // Convert route pattern (e.g., 'posts/{title}/{id}') into regex
-        $pattern = self::uriPattern($uri);
+    private static function load()
+    {
+        global $URLs, $requestMethod, $requestURI;
 
-        // Check for request match
-        if ($requestMethod === $methodAllowed && preg_match($pattern, $requestURI, $matches)) {
-            ErrorHandling::check_405($requestMethod, $methodAllowed);
+        foreach ($URLs as $uri => $URL) {
 
-            // Remove the first match (full match) from $matches
-            array_shift($matches);
+            # Convert route pattern (e.g., 'posts/{title}/{id}') into regex
+            $pattern = self::uriPattern($uri);
 
-            try {
-                if (is_callable($callback)) {
-                    return call_user_func($callback, ...$matches);
+            # Check for request match
+            if ($requestMethod === $URL['methodAllowed'] && preg_match($pattern, $requestURI, $matches)) {
+                ErrorHandling::check_405($requestMethod, $URL['methodAllowed']);
+
+                # Remove the first match (full match) from $matches
+                array_shift($matches);
+
+                try {
+                    if (is_callable($URL['callback'])) {
+                        return call_user_func($URL['callback'], ...$matches);
+                    }
+
+                    $controller = new $URL['callback']();
+                    return $controller->$URL['classMethod'](...array_values($matches));
+
+                    # return call_user_func_array([$controller, $URL['classMethod']], $matches); // Use if above method didnt work.
+                } catch (\Throwable $th) {
+                    ErrorHandling::handleException($th);
                 }
-
-                $controller = new $callback();
-                return $controller->$classMethod(...array_values($matches));
-
-                # return call_user_func_array([$controller, $classMethod], $matches); // Use if above method didnt work.
-            } catch (\Throwable $th) {
-                ErrorHandling::handleException($th);
             }
         }
+
+        # At the end of loop. Any route matched the request.
+        ErrorHandling::check_404();
     }
 
     // Add name to a route

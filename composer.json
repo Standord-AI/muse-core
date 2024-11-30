@@ -8,8 +8,9 @@
             "Kaviru\\MuseCore\\": "src/"
         },
         "files": [
-            "src/helpers.php",
-            "src/render.php"
+            "siteData.php",
+            "helpers.php",
+            "boostrap.php"
         ]
     },
     "authors": [

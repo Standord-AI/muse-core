@@ -18,6 +18,8 @@ class DataHandling
 
     public function __construct()
     {
+        global $envPath;
+        
         $this->get = (object) $_GET;
         $this->post = (object) $_POST;
         $this->cookie = (object) $_COOKIE;
@@ -31,7 +33,7 @@ class DataHandling
         }
 
         # Looing for .env at the root directory
-        $env = parse_ini_file(__DIR__ . '/../../../../.env');
+        $env = parse_ini_file( $envPath);
         $this->env = (object) $env;
     }
 }
