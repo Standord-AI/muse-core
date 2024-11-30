@@ -6,7 +6,11 @@
     "autoload": {
         "psr-4": {
             "Kaviru\\MuseCore\\": "src/"
-        }
+        },
+        "files": [
+            "src/helpers.php",
+            "src/render.php"
+        ]
     },
     "authors": [
         {
