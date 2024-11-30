@@ -19,4 +19,6 @@ if (config('APP_DEBUG')) {
 
 ob_start();
 
+include_once $routesPath;
+
 Route::load();

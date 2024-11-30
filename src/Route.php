@@ -31,7 +31,7 @@ class Route
     {
         global $URLs, $requestMethod, $requestURI;
 
-        foreach ($URLs as $uri => $URL) {
+        foreach ($URLs ?? [] as $uri => $URL) {
 
             # Convert route pattern (e.g., 'posts/{title}/{id}') into regex
             $pattern = self::uriPattern($uri);
