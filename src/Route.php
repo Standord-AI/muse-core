@@ -27,7 +27,7 @@ class Route
         $URLs[$uri] = ['callback' => $callback, 'classMethod' => $classMethod, 'methodAllowed' => $methodAllowed];
     }
 
-    private static function load()
+    public static function load()
     {
         global $URLs, $requestMethod, $requestURI;
 
