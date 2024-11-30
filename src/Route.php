@@ -58,8 +58,9 @@ class Route
             }
         }
 
-        # At the end of loop. Any route matched the request.
-        ErrorHandling::check_404();
+        # If no match was found, trigger 404 error
+        ErrorHandling::cleanOutputBuffer();
+        ErrorHandling::_404();
     }
 
     // Add name to a route

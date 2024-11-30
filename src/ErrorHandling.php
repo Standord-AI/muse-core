@@ -45,7 +45,7 @@ class ErrorHandling
     {
         global $requestURI, $URLs;
 
-        foreach ($URLs as $uri => $callback) {
+        foreach ($URLs as $uri => $URL) {
             // Convert route pattern (e.g., 'posts/{title}/{id}') into regex
             $pattern = uriPattern($uri);
 
