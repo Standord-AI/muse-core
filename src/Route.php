@@ -59,8 +59,7 @@ class Route
         }
 
         # If no match was found, trigger 404 error
-        ErrorHandling::cleanOutputBuffer();
-        ErrorHandling::_404();
+        ErrorHandling::check_404();
     }
 
     // Add name to a route
