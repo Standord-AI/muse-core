@@ -13,7 +13,6 @@ function view(string $location, array $variables = null, array $error = null)
     }
 
     $views = "/../../../../views";
-    echo __DIR__;
     $error = (object) $error;
     $view_missing_error = $error->code . ' : ' . $error->message . ",\n\n View file for error is missing.";
 
