@@ -43,14 +43,14 @@ class ErrorHandling
 
     public static function check_404()
     {
-        global $requestURI, $URLs;
+        global $URLs, $requestMethod, $requestURI;
 
-        foreach ($URLs ?? [] as $uri => $URL) {
+        foreach ($URLs ?? [] as $URLsKey => $URL) {
             // Convert route pattern (e.g., 'posts/{title}/{id}') into regex
-            $pattern = uriPattern($uri);
+            $pattern = uriPattern($URL['uri']);
 
             // Check if the current requestURI matches any registered pattern
-            if (preg_match($pattern, $requestURI)) {
+            if ($requestMethod === $URL['methodAllowed'] && preg_match($pattern, $requestURI)) {
                 return; // If a match is found, no need to proceed further
             }
         }

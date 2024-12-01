@@ -7,7 +7,7 @@ use Kaviru\MuseCore\ErrorHandling;
 function view(string $location, array $variables = null, array $error = ['code' => 404, 'message' => 'Page not found'])
 {
     global $requestURI, $namedRoutes, $viewPath; // load all the public variables
-
+    
     try {
         if (isset($variables)) {
             extract($variables);
@@ -19,7 +19,7 @@ function view(string $location, array $variables = null, array $error = ['code' 
         
         return require_once  $viewPath . $location;
     } catch (\Throwable $th) {
-            ErrorHandling::_404($error['code'] . ' : ' . $error['message'] . ",\n\n View file for error is missing.");
+        ErrorHandling::_404($error['code'] . ' : ' . $error['message'] . ",\n\n View file for error, is missing.");
     }
 }
 
@@ -44,7 +44,7 @@ function routePath(string $route)
 
     $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? "https" : "http";
     
-    if (substr($route, 0, 1) == '/') {
+    if (substr($route, 0, 1) != '/') {
         $route = '/' . $route;
     }
 

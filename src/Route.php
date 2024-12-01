@@ -62,7 +62,7 @@ class Route
                 }
             }
         }
-
+        
         # If no match was found, trigger 404 error
         ErrorHandling::check_404();
     }
@@ -85,7 +85,7 @@ class Route
         global $namedRoutes;
 
         if (!isset($namedRoutes[$name])) {
-            // throw new Exception("Route name '$name' not found.");
+            //throw new Exception("Route name '$name' not found.");
         }
 
         $uri = $namedRoutes[$name];
