@@ -40,7 +40,7 @@ function route(string $name, array $params = [])
 
 function routePath(string $route)
 {
-    global $httpHost, $requestURI;
+    global $httpHost, $subPath;
 
     $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? "https" : "http";
     
@@ -48,7 +48,7 @@ function routePath(string $route)
         $route = '/' . $route;
     }
 
-    return $protocol . '://' . $httpHost. $requestURI . $route;
+    return $protocol . '://' . $httpHost. $subPath . $route;
 }
 
 function asset(string $path)

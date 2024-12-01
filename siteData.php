@@ -24,3 +24,4 @@ $viewPath = __DIR__ . "/views";
 
 $envPath = __DIR__ . "/.env";
 $routesPath = __DIR__ . "/routes/web.pap";
+$subPath = __DIR__ . "/muse";
