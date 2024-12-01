@@ -1,283 +1,172 @@
 <?php
 
-namespace Kaviru\MuseCore;
-
-use PDO;
-use PDOException;
 use Kaviru\MuseCore\DataHandling;
 use Kaviru\MuseCore\ErrorHandling;
 
-/**
- * Manage any database system using this ORM. Made using the php PDO and classes.
- */
-class Database
+abstract class Database
 {
-    protected string $db_connection = "mysql";
-    protected string $servername = "localhost";
-    protected int $port = 3306;
-    protected string $username = "root";
-    protected string $password = "";
-    protected string $db_name = "";
+    private $dbConnection;
+    private $servername;
+    private $username;
+    private $password;
+    private $port;
+    private $dbName;
+    private $charset;
+    private $dsn;
+    private $fetchMode;
 
-    protected static string $table = "";
-    protected string $table_id_name = "id";
-    protected string $query = "";
-    protected $table_fetch_mode = "";
+    protected $connection;
+    protected $table;
+    protected $fillable = [];
+    protected $readable = [];
+    protected $dataTypes = [];
+    private $sortOrder = "";
 
     public function __construct()
     {
         $data = new DataHandling();
+        $this->dbConnection = $data->env->DB_CONNECTION ?? "mysql";
+        $this->servername = $data->env->DB_HOST ?? "localhost";
+        $this->port = $data->env->DB_PORT ?? 3306;
+        $this->dbName = $data->env->DB_DATABASE ?? "";
+        $this->charset = $data->env->DB_CHARSET ?? "utf8mb4";
+        $this->username = $data->env->DB_USERNAME ?? "root";
+        $this->password = $data->env->DB_PASSWORD ?? "";
+        $this->fetchMode = PDO::FETCH_ASSOC;
 
-        $this->db_connection = $data->env->DB_CONNECTION;
+        // Set up the PDO connection
+        $this->dsn = "$this->dbConnection:host=$this->servername;port=$this->port;dbname=$this->dbName;charset=$this->charset";
 
-        $this->servername = $data->env->DB_HOST;
-        $this->port = $data->env->DB_PORT;
-
-        $this->db_name = $data->env->DB_DATABASE;
-
-        $this->username = $data->env->DB_USERNAME;
-        $this->password = $data->env->DB_PASSWORD;
-
-        $this->table_fetch_mode = PDO::FETCH_OBJ;
+        try {
+            $this->connection = new PDO($this->dsn, $this->username, $this->password);
+            $this->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        } catch (PDOException $e) {
+            //die("Database connection failed: " . $e->getMessage());
+            ErrorHandling::_500("Database connection failed: " . $e->getMessage());
+        }
     }
 
-    public static function table($table_name)
+    private function getPdoParamType($type)
     {
-        self::$table = $table_name;
-
-        return new self;
+        switch (strtolower($type)) {
+            case 'int':
+                return PDO::PARAM_INT;
+            case 'string':
+            case 'text':
+                return PDO::PARAM_STR;
+            case 'bool':
+                return PDO::PARAM_BOOL;
+            case 'null':
+                return PDO::PARAM_NULL;
+            default:
+                throw new InvalidArgumentException("Unsupported data type: $type");
+        }
     }
 
-    public function query($query)
+    public function create(array $data)
     {
-        $this->query = $query;
+        $data = array_intersect_key($data, array_flip($this->fillable));
 
+        $columns = implode(", ", array_keys($data));
+        $placeholders = ":" . implode(", :", array_keys($data));
+
+        $sql = "INSERT INTO {$this->table} ($columns) VALUES ($placeholders)";
+        $stmt = $this->connection->prepare($sql);
+
+        foreach ($data as $key => $value) {
+            $type = $this->dataTypes[$key] ?? 'string';
+            $stmt->bindValue(":$key", $value, $this->getPdoParamType($type));
+        }
+
+        return $stmt->execute();
+    }
+
+    public function save($id, array $data)
+    {
+        $data = array_intersect_key($data, array_flip($this->fillable));
+
+        $setClause = "";
+        foreach ($data as $key => $value) {
+            $setClause .= "$key = :$key, ";
+        }
+        $setClause = rtrim($setClause, ", ");
+
+        $sql = "UPDATE {$this->table} SET $setClause WHERE id = :id";
+        $stmt = $this->connection->prepare($sql);
+
+        foreach ($data as $key => $value) {
+            $type = $this->dataTypes[$key] ?? 'string';
+            $stmt->bindValue(":$key", $value, $this->getPdoParamType($type));
+        }
+        $stmt->bindValue(":id", $id, PDO::PARAM_INT);
+
+        return $stmt->execute();
+    }
+
+    public function delete($id)
+    {
+        $sql = "DELETE FROM {$this->table} WHERE id = :id";
+        $stmt = $this->connection->prepare($sql);
+        $stmt->bindValue(":id", $id, PDO::PARAM_INT);
+
+        return $stmt->execute();
+    }
+
+    public function get($id)
+    {
+        $columns = implode(", ", $this->readable);
+        $sql = "SELECT $columns FROM {$this->table} WHERE id = :id";
+        $stmt = $this->connection->prepare($sql);
+        $stmt->bindValue(":id", $id, PDO::PARAM_INT);
+
+        $stmt->execute();
+        return $stmt->fetch($this->fetchMode);
+    }
+
+    public function where(array $conditions, $logicalOperator = 'AND')
+    {
+        $clauses = [];
+        $params = [];
+
+        foreach ($conditions as $condition) {
+            if (count($condition) !== 3) {
+                throw new InvalidArgumentException("Each condition must be an array with 3 elements: column, operator, value.");
+            }
+            [$column, $operator, $value] = $condition;
+
+            if (!in_array($operator, ['=', '!=', '>', '>=', '<', '<='], true)) {
+                throw new InvalidArgumentException("Unsupported operator: $operator");
+            }
+
+            $paramName = ":$column" . count($params);
+            $clauses[] = "$column $operator $paramName";
+            $params[$paramName] = [
+                'value' => $value,
+                'type' => $this->getPdoParamType($this->dataTypes[$column] ?? 'string'),
+            ];
+        }
+
+        $whereClause = implode(" $logicalOperator ", $clauses);
+        $columns = implode(", ", $this->readable);
+
+        $sql = "SELECT $columns FROM {$this->table} WHERE $whereClause {$this->sortOrder}";
+        $stmt = $this->connection->prepare($sql);
+
+        foreach ($params as $paramName => $param) {
+            $stmt->bindValue($paramName, $param['value'], $param['type']);
+        }
+
+        $stmt->execute();
+        return $stmt->fetchAll($this->fetchMode);
+    }
+
+    public function sort($order = 'ASC', $column = 'id')
+    {
+        $order = strtoupper($order);
+        if (!in_array($order, ['ASC', 'DESC'], true)) {
+            throw new InvalidArgumentException("Invalid sort order: $order");
+        }
+        $this->sortOrder = "ORDER BY $column $order";
         return $this;
-    }
-
-    public function setTableId($table_id_name)
-    {
-        $this->table_id_name = $table_id_name;
-
-        return $this;
-    }
-
-    public function setFetchMode($table_fetch_mode)
-    {
-        $this->table_fetch_mode = $table_fetch_mode;
-
-        return $this;
-    }
-
-    public function migrate($table_format)
-    {
-        try {
-            $conn = new PDO($this->db_connection . ":host=" . $this->servername . ";port=" . $this->port . ";dbname=" . $this->db_name, $this->username, $this->password);
-            // set the PDO error mode to exception
-            $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            //Connected successfully!
-
-            $stmt = $conn->prepare("SELECT * FROM " . self::$table . " $this->query;");
-
-            $table_format_code = "";
-            $counter = 1;
-
-            foreach ($table_format as $table_format_col) {
-                $table_format_code .= " " . $table_format_col;
-                if (count($table_format) > $counter) {
-                    $table_format_code .= ",";
-                }
-                $counter++;
-            }
-
-            // sql to create table
-            $sql = "CREATE TABLE " . self::$table . " (
-                        " . $table_format_code . ",
-                        updated_at TIMESTAMP NOT NULL,
-                        created_at TIMESTAMP NOT NULL
-                    )";
-
-            // use exec() because no results are returned
-            $conn->exec($sql);
-
-            return true;
-        } catch (PDOException $e) {
-            ErrorHandling::_500("Connection failed: " . $e->getMessage());
-        }
-
-        $conn = null;
-    }
-
-    public function get()
-    {
-        try {
-            $conn = new PDO($this->db_connection . ":host=" . $this->servername . ";port=" . $this->port . ";dbname=" . $this->db_name, $this->username, $this->password);
-            // set the PDO error mode to exception
-            $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            //Connected successfully!
-
-            $stmt = $conn->prepare("SELECT * FROM " . self::$table . " $this->query;");
-            $stmt->execute();
-
-            // set the resulting array to associative
-            $result = $stmt->setFetchMode($this->table_fetch_mode);
-
-            return $stmt->fetchAll();
-        } catch (PDOException $e) {
-            ErrorHandling::_500("Connection failed: " . $e->getMessage());
-        }
-
-        $conn = null;
-    }
-
-    public function insert(array $values)
-    {
-        try {
-            $conn = new PDO($this->db_connection . ":host=" . $this->servername . ";port=" . $this->port . ";dbname=" . $this->db_name, $this->username, $this->password);
-            // set the PDO error mode to exception
-            $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            //Connected successfully!
-
-            // begin the transaction
-            $conn->beginTransaction();
-
-            // our SQL statements
-            foreach ($values as $value) {
-
-                $quey_column = "";
-                $quey_value = "";
-                $array_keys_count = 1;
-                $array_values_count = 1;
-
-                foreach (array_keys($value) as $col) {
-                    $quey_column .= " " . $col;
-                    if (count(array_keys($value)) > $array_keys_count) {
-                        $quey_column .= ",";
-                    }
-                    $array_keys_count++;
-                }
-
-                foreach (array_values($value) as $col_value) {
-                    $quey_value .= " '$col_value'";
-                    if (count(array_values($value)) > $array_values_count) {
-                        $quey_value .= ",";
-                    }
-                    $array_values_count++;
-                }
-
-                $conn->exec("INSERT INTO " . self::$table . " (" . $quey_column . ")  VALUES (" . $quey_value . ");");
-            }
-
-            // commit the transaction
-            $conn->commit();
-
-            return true;
-        } catch (PDOException $e) {
-            ErrorHandling::_500("Connection failed: " . $e->getMessage());
-        }
-
-        $conn = null;
-    }
-
-    public function create(array $values)
-    {
-        try {
-            $conn = new PDO($this->db_connection . ":host=" . $this->servername . ";port=" . $this->port . ";dbname=" . $this->db_name, $this->username, $this->password);
-            // set the PDO error mode to exception
-            $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            //Connected successfully!
-
-            // our SQL statements
-            $quey_column = "";
-            $quey_value = "";
-            $array_keys_count = 1;
-            $array_values_count = 1;
-
-            foreach (array_keys($values) as $col) {
-                $quey_column .= " " . $col;
-                if (count(array_keys($values)) > $array_keys_count) {
-                    $quey_column .= ",";
-                }
-                $array_keys_count++;
-            }
-
-            foreach (array_values($values) as $col_value) {
-                $quey_value .= " '$col_value'";
-                if (count(array_values($values)) > $array_values_count) {
-                    $quey_value .= ",";
-                }
-                $array_values_count++;
-            }
-
-            $conn->exec("INSERT INTO " . self::$table . " (" . $quey_column . ", updated_at, created_at)  VALUES (" . $quey_value . ", '" . date('Y-m-d H:i:s') . "', '" . date('Y-m-d H:i:s') . "')");
-
-            $last_id = $conn->lastInsertId();
-
-            $stmt = $conn->prepare("SELECT * FROM " . self::$table . " WHERE $this->table_id_name=$last_id;");
-            $stmt->execute();
-
-            // set the resulting array to associative
-            $result = $stmt->setFetchMode($this->table_fetch_mode);
-
-            return $stmt->fetchAll();
-        } catch (PDOException $e) {
-            ErrorHandling::_500("Connection failed: " . $e->getMessage());
-        }
-
-        $conn = null;
-    }
-
-    public function update(array $values)
-    {
-        try {
-            $conn = new PDO($this->db_connection . ":host=" . $this->servername . ";port=" . $this->port . ";dbname=" . $this->db_name, $this->username, $this->password);
-            // set the PDO error mode to exception
-            $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            //Connected successfully!
-
-            $update_values = "";
-            $array_count = 1;
-
-            foreach ($values as $key => $value) {
-
-                $update_values .= " $key='$value'";
-                if (count($values) > $array_count) {
-                    $update_values .= ",";
-                }
-                $array_count++;
-            }
-
-            $stmt = $conn->prepare("UPDATE " . self::$table . " SET " . $update_values . ", updated_at='" . date('Y-m-d H:i:s') . "' " . $this->query . ";");
-
-            // execute the query
-            $stmt->execute();
-
-            // set the resulting array to associative
-            $result = $stmt->setFetchMode($this->table_fetch_mode);
-
-            return $stmt->rowCount();
-        } catch (PDOException $e) {
-            ErrorHandling::_500("Connection failed: " . $e->getMessage());
-        }
-
-        $conn = null;
-    }
-
-    public function delete()
-    {
-        try {
-            $conn = new PDO($this->db_connection . ":host=" . $this->servername . ";port=" . $this->port . ";dbname=" . $this->db_name, $this->username, $this->password);
-            // set the PDO error mode to exception
-            $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            //Connected successfully!
-
-            $conn->exec("DELETE FROM " . self::$table . " $this->query;");
-
-            return true;
-        } catch (PDOException $e) {
-            ErrorHandling::_500("Connection failed: " . $e->getMessage());
-        }
-
-        $conn = null;
     }
 }
