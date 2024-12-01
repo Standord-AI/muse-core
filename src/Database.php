@@ -1,5 +1,7 @@
 <?php
 
+namespace Kaviru\MuseCore;
+
 use Kaviru\MuseCore\DataHandling;
 use Kaviru\MuseCore\ErrorHandling;
 
