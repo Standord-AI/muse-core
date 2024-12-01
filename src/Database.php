@@ -2,8 +2,11 @@
 
 namespace Kaviru\MuseCore;
 
+use InvalidArgumentException;
 use Kaviru\MuseCore\DataHandling;
 use Kaviru\MuseCore\ErrorHandling;
+use PDO;
+use PDOException;
 
 abstract class Database
 {
