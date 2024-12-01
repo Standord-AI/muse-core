@@ -4,16 +4,9 @@ use Kaviru\MuseCore\Route;
 use Kaviru\MuseCore\DataHandling;
 use Kaviru\MuseCore\ErrorHandling;
 
-function view(string $location, array $variables = null, array $error = null)
+function view(string $location, array $variables = null, array $error = ['code' => 404, 'message' => 'Page not found'])
 {
     global $requestURI, $namedRoutes, $viewPath; // load all the public variables
-
-    if (!isset($error)) {
-        $error = ['code' => 404, 'message' => 'Page not found'];
-    }
-
-    $error = (object) $error;
-    $view_missing_error = $error->code . ' : ' . $error->message . ",\n\n View file for error is missing.";
 
     try {
         if (isset($variables)) {
@@ -23,14 +16,10 @@ function view(string $location, array $variables = null, array $error = null)
         if (substr($location, 0, 1) != '/') {
             $location = '/' . $location;
         }
-
+        
         return require_once  $viewPath . $location;
     } catch (\Throwable $th) {
-        if (!$error) {
-            ErrorHandling::_404("View file not found");
-        } else {
-            ErrorHandling::_404($view_missing_error);
-        }
+            ErrorHandling::_404($error['code'] . ' : ' . $error['message'] . ",\n\n View file for error is missing.");
     }
 }
 
@@ -51,24 +40,24 @@ function route(string $name, array $params = [])
 
 function routePath(string $route)
 {
-    global $httpHost;
+    global $httpHost, $requestURI;
 
-    $protocol = isset($_SERVER['HTTPS']) ? 'https' : 'http';
-
-    if (substr($route, 0, 1) != '/') {
+    $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? "https" : "http";
+    
+    if (substr($route, 0, 1) == '/') {
         $route = '/' . $route;
     }
 
-    return $protocol . '://' . $httpHost . $route;
+    return $protocol . '://' . $httpHost. $requestURI . $route;
 }
 
 function asset(string $path)
-{
+{   
     if (substr($path, 0, 1) != '/') {
         $path = '/' . $path;
     }
 
-    return route('public' . $path);
+    return routePath('public' . $path);
 }
 
 function request($parameter)

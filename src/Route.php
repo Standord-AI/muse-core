@@ -24,17 +24,19 @@ class Route
             $uri = '/' . $uri;
         }
 
-        $URLs[$uri] = ['callback' => $callback, 'classMethod' => $classMethod, 'methodAllowed' => $methodAllowed];
+        $URLsKey = $classMethod."@".$uri;
+
+        $URLs[$URLsKey] = ['uri' => $uri, 'callback' => $callback, 'classMethod' => $classMethod, 'methodAllowed' => $methodAllowed];
     }
 
     public static function load()
     {
         global $URLs, $requestMethod, $requestURI;
 
-        foreach ($URLs ?? [] as $uri => $URL) {
+        foreach ($URLs ?? [] as $URLsKey => $URL) {
 
             # Convert route pattern (e.g., 'posts/{title}/{id}') into regex
-            $pattern = self::uriPattern($uri);
+            $pattern = self::uriPattern($URL['uri']);
 
             # Check for request match
             if ($requestMethod === $URL['methodAllowed'] && preg_match($pattern, $requestURI, $matches)) {
@@ -49,10 +51,13 @@ class Route
                     }
 
                     $controller = new $URL['callback']();
-                    return $controller->$URL['classMethod'](...array_values($matches));
+                    $classMethod = $URL['classMethod'];
 
+                    return $controller->$classMethod(...array_values($matches));
+                    
                     # return call_user_func_array([$controller, $URL['classMethod']], $matches); // Use if above method didnt work.
                 } catch (\Throwable $th) {
+
                     ErrorHandling::handleException($th);
                 }
             }
@@ -80,7 +85,7 @@ class Route
         global $namedRoutes;
 
         if (!isset($namedRoutes[$name])) {
-            throw new Exception("Route name '$name' not found.");
+            // throw new Exception("Route name '$name' not found.");
         }
 
         $uri = $namedRoutes[$name];

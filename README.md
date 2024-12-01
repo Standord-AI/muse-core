@@ -10,49 +10,17 @@ Muse Core is a lightweight PHP framework for building web applications. It provi
 - Database: Connect to a database and perform CRUD operations.
 - Session Management: Manage user sessions and store data in the session.
 
-## Getting Started
+## Composer
 
-To get started with Muse Core, follow these steps:
+You can include Muse Core in your project using Composer.  
 
-1. Install Muse Core using Composer:
-
-```bash
+```
 composer require kaviru/muse-core
-```
-
-2. Create a new PHP file and include the `core.php` file:
-
-```php
-<?php
-
-require_once 'vendor/autoload.php';
-
-use Core\Core;
-
-Core::run();
-```
-
-3. Define routes in the `routes.php` file:
-
-```php
-<?php
-
-use Core\Route;
-
-Route::get('/', function () {
-    return 'Hello, World!';
-});
-```
-
-4. Run the application:
-
-```bash
-php routes.php
 ```
 
 ## Documentation
 
-For more information on Muse Core, refer to the official documentation at [muse.build](https://muse.build).
+For more information on Muse Core, refer to the official documentation at [muse.build](https://github.com/Kavirubc/muse-core).
 
 ## Contributing
 

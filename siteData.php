@@ -20,7 +20,7 @@ $URLs = [];
 
 $NamedRoutes = [];
 
-$viewPath = __DIR__ . "/../../../views";
+$viewPath = __DIR__ . "/views";
 
-$envPath = __DIR__ . "/../../../.env";
-$routesPath = __DIR__ . "/../../../routes/web.pap";
+$envPath = __DIR__ . "/.env";
+$routesPath = __DIR__ . "/routes/web.pap";

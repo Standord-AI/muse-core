@@ -91,11 +91,9 @@ class ErrorHandling
 
     public static function customError()
     {
-        $err = error_get_last();
+        $error = error_get_last();
 
-        return print_r($err);
-
-        if (!is_null($err)) {
+        if ($error !== null) {
 
             self::cleanOutputBuffer();
 
@@ -145,12 +143,13 @@ class ErrorHandling
             E_ERROR => "Fatal Error",
             E_WARNING => "Warning",
             E_NOTICE => "Notice",
+            E_PARSE => "Parse error",
             default => "Unknown Error",
         };
     }
 
     private static function isDebugMode(): bool
     {
-        return function_exists('config') ? config('APP_DEBUG') : false;
+        return function_exists('config') ? (config('APP_DEBUG') == true ? true: false ) : false;
     }
 }

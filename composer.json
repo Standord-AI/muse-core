@@ -8,7 +8,6 @@
             "Kaviru\\MuseCore\\": "src/"
         },
         "files": [
-            "siteData.php",
             "helpers.php",
             "bootloader.php"
         ]
