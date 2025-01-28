@@ -14,11 +14,15 @@
     },
     "authors": [
         {
-            "name": "Standord Hapuarachchi",
-            "email": "hapuarachchistandord@gmail.com"
+            "name": "Kenura Gunarathna",
+            "email": "kenuragunarathna@gmail.com"
+        },
+        {
+            "name": "Kaviru Hapuarachchi",
+            "email": "hapuarachchikaviru@gmail.com"
         }
     ],
     "require": {
-        "php": ">=7.0"
+        "php": ">=8.0"
     }
 }
