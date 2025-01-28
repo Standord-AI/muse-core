@@ -20,7 +20,7 @@ composer require standord/muse-core
 
 ## Documentation
 
-For more information on Muse Core, refer to the official documentation at [Standord-AI/muse-core](https://github.com/Standord-AI/muse-core).
+For more information on Muse Core, refer to the official documentation at [Standord-AI/muse-core](https://github.com/Standord-AI/muse-core/blob/main/README.md).
 
 ## Contributing
 
@@ -28,4 +28,4 @@ Contributions are welcome! If you find a bug or have a suggestion, please open a
 
 ## License
 
-Muse Core is licensed under the MIT License. See the [LICENSE](LICENSE) file for more information.
+Muse Core is licensed under the MIT License. See the [LICENSE](https://github.com/Standord-AI/muse-core/blob/main/LICENSE) file for more information.
