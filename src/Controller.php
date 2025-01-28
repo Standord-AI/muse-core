@@ -1,6 +1,6 @@
 <?php
 
-namespace Kaviru\MuseCore;
+namespace Standord\MuseCore;
 
 /**
  * Parent Controller class of all Controllers.

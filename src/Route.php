@@ -1,6 +1,6 @@
 <?php
 
-namespace Kaviru\MuseCore;
+namespace Standord\MuseCore;
 
 use Exception;
 
@@ -80,7 +80,7 @@ class Route
     }
 
     // Generate URL by route name
-    public static function route(string $name, array|string $params = [])
+    public static function route(string $name, $params = [])
     {
         global $namedRoutes;
 

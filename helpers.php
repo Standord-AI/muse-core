@@ -35,7 +35,7 @@ function redirect(string $url)
 
 function route(string $name, array $params = [])
 {
-    return Route::route($name, params: $params);
+    return Route::route($name, $params);
 }
 
 function routePath(string $route)

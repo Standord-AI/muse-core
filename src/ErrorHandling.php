@@ -1,6 +1,6 @@
 <?php
 
-namespace Kaviru\MuseCore;
+namespace Standord\MuseCore;
 
 use Throwable;
 
@@ -139,13 +139,18 @@ class ErrorHandling
 
     private static function getErrorType(int $type): string
     {
-        return match ($type) {
-            E_ERROR => "Fatal Error",
-            E_WARNING => "Warning",
-            E_NOTICE => "Notice",
-            E_PARSE => "Parse error",
-            default => "Unknown Error",
-        };
+        switch ($type) {
+            case E_ERROR:
+                return "Fatal Error";
+            case E_WARNING:
+                return "Warning";
+            case E_NOTICE:
+                return "Notice";
+            case E_PARSE:
+                return "Parse error";
+            default:
+                return "Unknown Error";
+        }
     }
 
     private static function isDebugMode(): bool

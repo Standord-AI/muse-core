@@ -1,11 +1,11 @@
 {
-    "name": "kaviru/muse-core",
+    "name": "standord/muse-core",
     "description": "Core of the Muse Framework.",
     "type": "library",
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "Kaviru\\MuseCore\\": "src/"
+            "Standord\\MuseCore\\": "src/"
         },
         "files": [
             "helpers.php",
@@ -14,9 +14,11 @@
     },
     "authors": [
         {
-            "name": "Kaviru Hapuarachchi",
-            "email": "hapuarachchikaviru@gmail.com"
+            "name": "Standord Hapuarachchi",
+            "email": "hapuarachchistandord@gmail.com"
         }
     ],
-    "require": {}
+    "require": {
+        "php": ">=7.0"
+    }
 }

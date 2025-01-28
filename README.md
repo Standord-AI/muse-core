@@ -15,12 +15,12 @@ Muse Core is a lightweight PHP framework for building web applications. It provi
 You can include Muse Core in your project using Composer.  
 
 ```
-composer require kaviru/muse-core
+composer require standord/muse-core
 ```
 
 ## Documentation
 
-For more information on Muse Core, refer to the official documentation at [muse.build](https://github.com/Kavirubc/muse-core).
+For more information on Muse Core, refer to the official documentation at [Standordbc/muse-core](https://github.com/Standordbc/muse-core).
 
 ## Contributing
 

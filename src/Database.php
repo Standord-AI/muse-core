@@ -1,10 +1,10 @@
 <?php
 
-namespace Kaviru\MuseCore;
+namespace Standord\MuseCore;
 
 use InvalidArgumentException;
-use Kaviru\MuseCore\DataHandling;
-use Kaviru\MuseCore\ErrorHandling;
+use Standord\MuseCore\DataHandling;
+use Standord\MuseCore\ErrorHandling;
 use PDO;
 use PDOException;
 

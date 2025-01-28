@@ -1,7 +1,7 @@
 <?php
 
-use Kaviru\MuseCore\ErrorHandling;
-use Kaviru\MuseCore\Route;
+use Standord\MuseCore\ErrorHandling;
+use Standord\MuseCore\Route;
 
 # Set the custom error handler
 register_shutdown_function(function () {
