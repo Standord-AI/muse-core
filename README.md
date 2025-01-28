@@ -20,7 +20,7 @@ composer require standord/muse-core
 
 ## Documentation
 
-For more information on Muse Core, refer to the official documentation at [Standordbc/muse-core](https://github.com/Standordbc/muse-core).
+For more information on Muse Core, refer to the official documentation at [Standord-AI/muse-core](https://github.com/Standord-AI/muse-core).
 
 ## Contributing
 
