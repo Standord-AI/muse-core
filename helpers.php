@@ -1,8 +1,8 @@
 <?php
 
-use Kaviru\MuseCore\Route;
-use Kaviru\MuseCore\DataHandling;
-use Kaviru\MuseCore\ErrorHandling;
+use Standord\MuseCore\Route;
+use Standord\MuseCore\DataHandling;
+use Standord\MuseCore\ErrorHandling;
 
 function view(string $location, array $variables = null, array $error = ['code' => 404, 'message' => 'Page not found'])
 {
